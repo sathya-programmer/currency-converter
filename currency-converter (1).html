@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>World Currency Converter</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{--navy:#0b2545;--blue:#1d4ed8;--teal:#0e7490;--ink:#1e293b;--mute:#64748b;--line:#d5dce8;--bg:#f1f4f9;--card:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+.hero{background:linear-gradient(135deg,var(--navy),#14407a 60%,var(--teal));color:#fff;padding:44px 16px 96px}
+.wrap{max-width:960px;margin:0 auto}
+h1{margin:0;font-size:clamp(1.8rem,4.5vw,2.8rem);font-weight:700;letter-spacing:-.02em}
+.hero p{margin:10px 0 0;color:#cfe0f5;max-width:560px;line-height:1.5}
+main{max-width:960px;margin:-64px auto 0;padding:0 16px 48px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px;box-shadow:0 12px 32px rgba(11,37,69,.12)}
+label{display:block;font-weight:600;font-size:.85rem;color:var(--mute);margin-bottom:6px}
+.row{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:end}
+.amt{width:100%;font:600 1.6rem inherit;font-family:inherit;padding:12px 16px;border:1px solid var(--line);border-radius:10px;background:#f8fafc;color:var(--navy)}
+.amt:focus,.pick>button:focus-visible,.swap:focus-visible,.chip:focus-visible,.menu input:focus{outline:3px solid #93b4f5;outline-offset:1px}
+.pick{position:relative}
+.pick>button{width:100%;display:flex;align-items:center;gap:12px;text-align:left;font:500 1rem inherit;font-family:inherit;padding:12px 16px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);cursor:pointer;min-height:58px}
+.pick>button:hover{border-color:var(--blue)}
+.f{font-size:1.5rem}
+.pick>button b{flex:1;min-width:0;font-weight:600}
+.pick>button small{display:block;color:var(--mute);font-weight:400}
+.menu{display:none;position:absolute;z-index:20;left:0;right:0;top:calc(100% + 6px);background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 16px 40px rgba(11,37,69,.18);padding:10px}
+.menu.open{display:block}
+.menu input{width:100%;font:inherit;font-family:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px}
+.menu ul{list-style:none;margin:0;padding:0;max-height:280px;overflow:auto}
+.menu li{display:flex;gap:10px;align-items:center;padding:9px 10px;border-radius:8px;cursor:pointer}
+.menu li:hover,.menu li.sel{background:#e8effc}
+.menu li em{margin-left:auto;font-style:normal;font-weight:600;color:var(--blue)}
+.swap{width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--blue);font-size:1.3rem;cursor:pointer;transition:background .2s,color .2s;margin-bottom:5px}
+.swap:hover{background:var(--blue);color:#fff}
+.result{margin-top:24px;border-radius:12px;padding:22px 24px;background:var(--navy);color:#fff;border-left:6px solid #38bdf8}
+.result .l{color:#b6c8e3;font-weight:500}
+.result .big{font-size:clamp(1.9rem,6vw,3.2rem);font-weight:700;letter-spacing:-.02em;word-break:break-word;line-height:1.15;margin:6px 0}
+.result .r{color:#b6c8e3}
+.status{display:inline-flex;align-items:center;gap:8px;margin-top:16px;font-size:.88rem;color:var(--mute)}
+.dot{width:9px;height:9px;border-radius:50%;background:#94a3b8}.dot.live{background:#16a34a}.dot.off{background:#d97706}
+h2{font-size:1.15rem;margin:32px 0 12px;color:var(--navy)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:12px}
+.chip{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px;cursor:pointer;font:inherit;font-family:inherit;color:var(--ink);text-align:left}
+.chip:hover{border-color:var(--blue);box-shadow:0 4px 12px rgba(29,78,216,.12)}
+.chip b{display:block;font-weight:600;color:var(--navy);word-break:break-word}.chip small{color:var(--mute)}
+footer{text-align:center;margin-top:30px;font-size:.82rem;color:var(--mute)}
+@media(max-width:640px){.row{grid-template-columns:1fr}.swap{justify-self:center;margin:0}.card{padding:18px}}
+@media(prefers-reduced-motion:reduce){.swap{transition:none}}
+</style>
+</head>
+<body>
+<div class="hero"><div class="wrap">
+<h1>World Currency Converter</h1>
+<p>Convert between 150+ world currencies using live exchange rates.</p>
+</div></div>
+<main>
+<section class="card" aria-label="Currency converter">
+<div style="max-width:420px"><label for="amt">Amount</label><input id="amt" class="amt" type="number" inputmode="decimal" min="0" value="100"></div>
+<div class="row" style="margin-top:18px">
+<div class="pick" id="pFrom"><label>From</label></div>
+<button class="swap" id="swap" aria-label="Swap currencies">⇄</button>
+<div class="pick" id="pTo"><label>To</label></div>
+</div>
+<div class="result" aria-live="polite"><div class="l" id="rl"></div><div class="big" id="rb"></div><div class="r" id="rr"></div></div>
+<div class="status"><span class="dot" id="dot"></span><span id="st">Loading rates…</span></div>
+</section>
+<h2>Your amount in popular currencies</h2>
+<div class="grid" id="pop"></div>
+<footer>Rates from open.er-api.com. For information only, not financial advice.</footer>
+</main>
+<script>
+const NAMES="USD:US Dollar|EUR:Euro|GBP:British Pound|INR:Indian Rupee|JPY:Japanese Yen|AUD:Australian Dollar|CAD:Canadian Dollar|CHF:Swiss Franc|CNY:Chinese Yuan|AED:UAE Dirham|SGD:Singapore Dollar|BRL:Brazilian Real|AFN:Afghan Afghani|ALL:Albanian Lek|DZD:Algerian Dinar|AOA:Angolan Kwanza|XCD:East Caribbean Dollar|ARS:Argentine Peso|AMD:Armenian Dram|AZN:Azerbaijani Manat|BSD:Bahamian Dollar|BHD:Bahraini Dinar|BDT:Bangladeshi Taka|BBD:Barbadian Dollar|BYN:Belarusian Ruble|BZD:Belize Dollar|XOF:West African CFA Franc|BTN:Bhutanese Ngultrum|BOB:Bolivian Boliviano|BAM:Bosnia Convertible Mark|BWP:Botswana Pula|BND:Brunei Dollar|BIF:Burundian Franc|KHR:Cambodian Riel|XAF:Central African CFA Franc|CVE:Cape Verdean Escudo|CLP:Chilean Peso|COP:Colombian Peso|KMF:Comorian Franc|CDF:Congolese Franc|CRC:Costa Rican Colón|CUP:Cuban Peso|CZK:Czech Koruna|DKK:Danish Krone|DJF:Djiboutian Franc|DOP:Dominican Peso|EGP:Egyptian Pound|ERN:Eritrean Nakfa|SZL:Swazi Lilangeni|ETB:Ethiopian Birr|FJD:Fijian Dollar|GMD:Gambian Dalasi|GEL:Georgian Lari|GHS:Ghanaian Cedi|GTQ:Guatemalan Quetzal|GNF:Guinean Franc|GYD:Guyanese Dollar|HTG:Haitian Gourde|HNL:Honduran Lempira|HKD:Hong Kong Dollar|HUF:Hungarian Forint|ISK:Icelandic Króna|IDR:Indonesian Rupiah|IRR:Iranian Rial|IQD:Iraqi Dinar|ILS:Israeli Shekel|JMD:Jamaican Dollar|JOD:Jordanian Dinar|KZT:Kazakhstani Tenge|KES:Kenyan Shilling|KWD:Kuwaiti Dinar|KGS:Kyrgyzstani Som|LAK:Lao Kip|LBP:Lebanese Pound|LSL:Lesotho Loti|LRD:Liberian Dollar|LYD:Libyan Dinar|MOP:Macanese Pataca|MGA:Malagasy Ariary|MWK:Malawian Kwacha|MYR:Malaysian Ringgit|MVR:Maldivian Rufiyaa|MRU:Mauritanian Ouguiya|MUR:Mauritian Rupee|MXN:Mexican Peso|MDL:Moldovan Leu|MNT:Mongolian Tögrög|MAD:Moroccan Dirham|MZN:Mozambican Metical|MMK:Myanmar Kyat|NAD:Namibian Dollar|NPR:Nepalese Rupee|NZD:New Zealand Dollar|NIO:Nicaraguan Córdoba|NGN:Nigerian Naira|KPW:North Korean Won|MKD:Macedonian Denar|NOK:Norwegian Krone|OMR:Omani Rial|PKR:Pakistani Rupee|PAB:Panamanian Balboa|PGK:Papua New Guinean Kina|PYG:Paraguayan Guaraní|PEN:Peruvian Sol|PHP:Philippine Peso|PLN:Polish Złoty|QAR:Qatari Riyal|RON:Romanian Leu|RUB:Russian Ruble|RWF:Rwandan Franc|WST:Samoan Tālā|STN:São Tomé Dobra|SAR:Saudi Riyal|RSD:Serbian Dinar|SCR:Seychellois Rupee|SLE:Sierra Leonean Leone|SBD:Solomon Islands Dollar|SOS:Somali Shilling|ZAR:South African Rand|KRW:South Korean Won|SSP:South Sudanese Pound|LKR:Sri Lankan Rupee|SDG:Sudanese Pound|SRD:Surinamese Dollar|SEK:Swedish Krona|SYP:Syrian Pound|TWD:New Taiwan Dollar|TJS:Tajikistani Somoni|TZS:Tanzanian Shilling|THB:Thai Baht|TOP:Tongan Paʻanga|TTD:Trinidad & Tobago Dollar|TND:Tunisian Dinar|TRY:Turkish Lira|TMT:Turkmenistani Manat|UGX:Ugandan Shilling|UAH:Ukrainian Hryvnia|UYU:Uruguayan Peso|UZS:Uzbekistani Som|VUV:Vanuatu Vatu|VES:Venezuelan Bolívar|VND:Vietnamese Dong|YER:Yemeni Rial|ZMW:Zambian Kwacha|ZWG:Zimbabwe Gold";
+// Country:Currency, used so you can also search by country name
+const RAW="Afghanistan:AFN|Albania:ALL|Algeria:DZD|Andorra:EUR|Angola:AOA|Antigua and Barbuda:XCD|Argentina:ARS|Armenia:AMD|Australia:AUD|Austria:EUR|Azerbaijan:AZN|Bahamas:BSD|Bahrain:BHD|Bangladesh:BDT|Barbados:BBD|Belarus:BYN|Belgium:EUR|Belize:BZD|Benin:XOF|Bhutan:BTN|Bolivia:BOB|Bosnia and Herzegovina:BAM|Botswana:BWP|Brazil:BRL|Brunei:BND|Bulgaria:EUR|Burkina Faso:XOF|Burundi:BIF|Cambodia:KHR|Cameroon:XAF|Canada:CAD|Cape Verde:CVE|Central African Republic:XAF|Chad:XAF|Chile:CLP|China:CNY|Colombia:COP|Comoros:KMF|Congo:XAF|DR Congo:CDF|Costa Rica:CRC|Côte d'Ivoire:XOF|Croatia:EUR|Cuba:CUP|Cyprus:EUR|Czechia:CZK|Denmark:DKK|Djibouti:DJF|Dominica:XCD|Dominican Republic:DOP|Ecuador:USD|Egypt:EGP|El Salvador:USD|Equatorial Guinea:XAF|Eritrea:ERN|Estonia:EUR|Eswatini:SZL|Ethiopia:ETB|Fiji:FJD|Finland:EUR|France:EUR|Gabon:XAF|Gambia:GMD|Georgia:GEL|Germany:EUR|Ghana:GHS|Greece:EUR|Grenada:XCD|Guatemala:GTQ|Guinea:GNF|Guinea-Bissau:XOF|Guyana:GYD|Haiti:HTG|Honduras:HNL|Hong Kong:HKD|Hungary:HUF|Iceland:ISK|India:INR|Indonesia:IDR|Iran:IRR|Iraq:IQD|Ireland:EUR|Israel:ILS|Italy:EUR|Jamaica:JMD|Japan:JPY|Jordan:JOD|Kazakhstan:KZT|Kenya:KES|Kiribati:AUD|Kosovo:EUR|Kuwait:KWD|Kyrgyzstan:KGS|Laos:LAK|Latvia:EUR|Lebanon:LBP|Lesotho:LSL|Liberia:LRD|Libya:LYD|Liechtenstein:CHF|Lithuania:EUR|Luxembourg:EUR|Macao:MOP|Madagascar:MGA|Malawi:MWK|Malaysia:MYR|Maldives:MVR|Mali:XOF|Malta:EUR|Marshall Islands:USD|Mauritania:MRU|Mauritius:MUR|Mexico:MXN|Micronesia:USD|Moldova:MDL|Monaco:EUR|Mongolia:MNT|Montenegro:EUR|Morocco:MAD|Mozambique:MZN|Myanmar:MMK|Namibia:NAD|Nauru:AUD|Nepal:NPR|Netherlands:EUR|New Zealand:NZD|Nicaragua:NIO|Niger:XOF|Nigeria:NGN|North Korea:KPW|North Macedonia:MKD|Norway:NOK|Oman:OMR|Pakistan:PKR|Palau:USD|Palestine:ILS|Panama:PAB|Papua New Guinea:PGK|Paraguay:PYG|Peru:PEN|Philippines:PHP|Poland:PLN|Portugal:EUR|Qatar:QAR|Romania:RON|Russia:RUB|Rwanda:RWF|Saint Kitts and Nevis:XCD|Saint Lucia:XCD|Saint Vincent:XCD|Samoa:WST|San Marino:EUR|São Tomé and Príncipe:STN|Saudi Arabia:SAR|Senegal:XOF|Serbia:RSD|Seychelles:SCR|Sierra Leone:SLE|Singapore:SGD|Slovakia:EUR|Slovenia:EUR|Solomon Islands:SBD|Somalia:SOS|South Africa:ZAR|South Korea:KRW|South Sudan:SSP|Spain:EUR|Sri Lanka:LKR|Sudan:SDG|Suriname:SRD|Sweden:SEK|Switzerland:CHF|Syria:SYP|Taiwan:TWD|Tajikistan:TJS|Tanzania:TZS|Thailand:THB|Timor-Leste:USD|Togo:XOF|Tonga:TOP|Trinidad and Tobago:TTD|Tunisia:TND|Türkiye:TRY|Turkmenistan:TMT|Tuvalu:AUD|Uganda:UGX|Ukraine:UAH|United Arab Emirates:AED|United Kingdom:GBP|United States:USD|Uruguay:UYU|Uzbekistan:UZS|Vanuatu:VUV|Vatican City:EUR|Venezuela:VES|Vietnam:VND|Yemen:YER|Zambia:ZMW|Zimbabwe:ZWG";
+// Approximate offline snapshot (per 1 USD), used only if the live API cannot be reached
+const FB="EUR.86 GBP.75 INR88 JPY150 CNY7.1 AUD1.52 CAD1.38 CHF.8 AED3.67 SAR3.75 QAR3.64 KWD.307 BHD.376 OMR.385 JOD.709 ILS3.3 TRY41 EGP48 ZAR17.5 NGN1500 KES129 GHS11 MAD9.2 DZD130 TND2.9 BRL5.4 ARS1400 CLP950 COP3900 PEN3.6 MXN18.3 MYR4.2 SGD1.29 THB32.5 IDR16500 PHP57 VND26000 KRW1400 HKD7.8 TWD30.5 PKR282 BDT122 LKR300 NPR141 RUB82 UAH41 PLN3.7 CZK21 HUF340 RON4.4 SEK9.4 NOK10 DKK6.4 ISK125 NZD1.7 KZT540 XOF565 XAF565 UZS12000 ETB150 TZS2500 UGX3600 XCD2.7 BSD1 PAB1 HNL26 GTQ7.7 CRC500 DOP60 JMD160 MMK2100 KHR4000 LAK21000 MNT3500 AFN68 IQD1310 IRR42000 BYN3.3 GEL2.7 AMD385 AZN1.7 BND1.29 FJD2.25 PGK4.2 BWP13.5 MUR45 RWF1450 ZMW24";
+const POP=["USD","EUR","GBP","INR","JPY","AUD","CAD","CHF","CNY","AED","SGD","BRL"];
+const $=id=>document.getElementById(id);
+const FLAG={EUR:"EU",USD:"US",XOF:"SN",XAF:"CM",XCD:"AG"};
+const flag=cur=>{const c=FLAG[cur]||cur.slice(0,2);return String.fromCodePoint(...[...c].map(x=>127397+x.charCodeAt(0)))};
+const used={};RAW.split("|").forEach(s=>{const [n,c]=s.split(":");(used[c]=used[c]||[]).push(n)});
+const list=NAMES.split("|").map(s=>{const [cur,name]=s.split(":");return{cur,name,where:(used[cur]||[]).join(" ").toLowerCase()}}).sort((a,b)=>a.name.localeCompare(b.name));
+const byCur=Object.fromEntries(list.map(c=>[c.cur,c]));
+let rates={USD:1};FB.split(" ").forEach(s=>{const m=s.match(/^([A-Z]+)([\d.]+)$/);rates[m[1]]=parseFloat(m[2])});
+let from=byCur.USD,to=byCur.INR;
+const fmt=(n,cur)=>{try{return new Intl.NumberFormat(undefined,{style:"currency",currency:cur,maximumFractionDigits:n<1?6:2}).format(n)}catch(e){return n.toLocaleString(undefined,{maximumFractionDigits:2})+" "+cur}};
+const rate=(a,b)=>(rates[a]&&rates[b])?rates[b]/rates[a]:null;
+
+function makePicker(host,get,set){
+ const btn=document.createElement("button");btn.type="button";btn.setAttribute("aria-haspopup","listbox");
+ const menu=document.createElement("div");menu.className="menu";
+ menu.innerHTML='<input placeholder="Search currency, code or country" aria-label="Search currencies"><ul role="listbox"></ul>';
+ host.append(btn,menu);const inp=menu.querySelector("input"),ul=menu.querySelector("ul");
+ const paint=()=>{const c=get();btn.innerHTML=`<span class="f">${flag(c.cur)}</span><b>${c.name}<small>${c.cur}</small></b><span>▾</span>`};
+ const fill=q=>{q=q.toLowerCase();ul.innerHTML="";list.filter(c=>!q||c.name.toLowerCase().includes(q)||c.cur.toLowerCase().includes(q)||c.where.includes(q)).forEach(c=>{
+  const li=document.createElement("li");if(c===get())li.className="sel";li.setAttribute("role","option");
+  li.innerHTML=`<span class="f">${flag(c.cur)}</span><span>${c.name}</span><em>${c.cur}</em>`;
+  li.onclick=()=>{set(c);menu.classList.remove("open");paint();update()};ul.append(li)})};
+ btn.onclick=()=>{const o=!menu.classList.contains("open");document.querySelectorAll(".menu").forEach(m=>m.classList.remove("open"));
+  if(o){menu.classList.add("open");inp.value="";fill("");inp.focus()}};
+ inp.oninput=()=>fill(inp.value);
+ inp.onkeydown=e=>{if(e.key==="Escape"){menu.classList.remove("open");btn.focus()}if(e.key==="Enter"){const f=ul.querySelector("li");if(f)f.click()}};
+ paint();return paint;
+}
+const pf=makePicker($("pFrom"),()=>from,c=>from=c);
+const pt=makePicker($("pTo"),()=>to,c=>to=c);
+document.addEventListener("click",e=>{if(!e.target.closest(".pick"))document.querySelectorAll(".menu").forEach(m=>m.classList.remove("open"))});
+$("swap").onclick=()=>{[from,to]=[to,from];pf();pt();update()};
+$("amt").oninput=update;
+
+function update(){
+ const a=parseFloat($("amt").value)||0,r=rate(from.cur,to.cur);
+ $("rl").textContent=`${fmt(a,from.cur)} ${from.name} =`;
+ if(r===null){$("rb").textContent="Rate unavailable";$("rr").textContent="Open this page online to load this currency."}
+ else{$("rb").textContent=fmt(a*r,to.cur);$("rr").textContent=`${to.name} · 1 ${from.cur} = ${r.toLocaleString(undefined,{maximumFractionDigits:6})} ${to.cur}`}
+ $("pop").innerHTML="";
+ POP.forEach(cur=>{const x=rate(from.cur,cur);if(x===null)return;const c=byCur[cur];
+  const b=document.createElement("button");b.className="chip";b.type="button";
+  b.innerHTML=`<span class="f">${flag(cur)}</span><span><b>${fmt(a*x,cur)}</b><small>${c.name}</small></span>`;
+  b.onclick=()=>{to=c;pt();update()};$("pop").append(b)});
+}
+async function load(){
+ try{
+  const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),8000);
+  const r=await fetch("https://open.er-api.com/v6/latest/USD",{signal:ctl.signal});clearTimeout(t);
+  const d=await r.json();if(d.result!=="success")throw 0;
+  rates=d.rates;
+  $("dot").className="dot live";$("st").textContent="Live rates · updated "+new Date(d.time_last_update_unix*1000).toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"});
+ }catch(e){$("dot").className="dot off";$("st").textContent="Offline snapshot · approximate rates for major currencies"}
+ update();
+}
+update();load();
+</script>
+</body>
+</html>
